@@ -17,7 +17,7 @@ from torch.optim import lr_scheduler
 from dataset import SIIMDataset
 
 # training csv file path
-TRAINING_CSV = ""
+TRAINING_CSV = "Dataset/stage_2_train.csv"
 
 # training and test batch sizes
 TRAINING_BATCH_SIZE = 16
@@ -49,7 +49,7 @@ def train(dataset, data_loader, model, criterion, optimizer):
     for d in tk0:
         # fetch input images and masks
         # from dataset batch
-        inputs = d["images"]
+        inputs = d["image"]
         targets = d["mask"]
 
         # move images and masks to cpu/gpu device
@@ -109,15 +109,15 @@ if __name__ == "__main__":
     )
 
     # training and validation images list/arrays
-    training_images = df_train.image_id.values
-    validation_images = df_valid.image_id.values
+    training_images = df_train.ImageId.values
+    validation_images = df_valid.ImageId.values
 
     # fetch unet model from segmentation models with specified encoder architecture
     model = smp.Unet(
         encoder_name=ENCODER,
         encoder_weights=ENCODER_WEIGHTS,
         classes=1,
-        activation=None
+        activation="sigmoid"
     )
 
     # segmentation model provides you with a preprocessing function
@@ -175,7 +175,6 @@ if __name__ == "__main__":
     print(f"Training batch size: {TRAINING_BATCH_SIZE}")
     print(f"Test batch size: {TEST_BATCH_SIZE}")
     print(f"Epochs: {EPOCHS}")
-    print(f"Image size: {IMAGE_SIZE}")
     print(f"Number of training images: {len(train_dataset)}")
     print(f"Number of validation images: {len(valid_dataset)}")
     print(f"Encoder: {ENCODER}")

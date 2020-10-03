@@ -2,7 +2,7 @@ import os
 import glob
 import torch
 
-import numpy as numpy
+import numpy as np
 import pandas as pd
 
 from PIL import Image, ImageFile
@@ -20,12 +20,12 @@ from albumentations import(
     ShiftScaleRotate
 )
 
-import config
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
-TRAIN_PATH = "Dataset/stage_2_train.csv"
+TRAIN_PATH = "Dataset/train"
+MASK_PATH = "Dataset/masks"
 
-class SIMDataset(Dataset):
+class SIIMDataset(Dataset):
     def __init__(self, image_ids, transform=True, preprocessing_fn=None):
         """
         Dataset class for segmentation problem
@@ -66,13 +66,13 @@ class SIMDataset(Dataset):
         # going over all image_ids to store image and mask paths
         counter = 0
         for imgid in image_ids:
-            files = glob.glob(os.path.join(config.TRAIN_PATH, imgid, "*.png"))
+            files = glob.glob(os.path.join(TRAIN_PATH, imgid, "*.png"))
             self.data[counter] = {
                 "img_path": os.path.join(
-                    config.TRAIN_PATH, imgid + ".png"
+                    TRAIN_PATH, imgid + ".png"
                 ),
                 "mask_path": os.path.join(
-                    config.TRAIN_PATH, imgid + "_mask.png"
+                    MASK_PATH, imgid + ".png"
                 )
             }
             counter += 1 
@@ -97,10 +97,11 @@ class SIMDataset(Dataset):
         mask = Image.open(mask_path)
 
         # convert to binary float matrix
+        #mask = np.array(mask)  # !!!!!!!!!!!!
         mask = (mask >= 1).astype("float32")
         
         # if this is training data, apply transforms
-        if self.transfrom is True:
+        if self.transform is True:
             augmented = self.aug(image=img, mask=mask)
             img = augmented["image"]
             mask = augmented["mask"]
